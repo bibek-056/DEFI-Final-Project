@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import logo from "../../src/assets/logo.png";
 import { Link } from "react-router-dom";
-import Banner from "../Components/Banner";
-import Belt from "../Components/Belt";
+
 
 const LandingPage = () => {
 
@@ -21,10 +20,23 @@ const LandingPage = () => {
         setDisabled(!e.target.value || !email);
     }
 
+    // const handleSubmit = (e) => {
+    //     e.preventDefault()
+    //     if (email === "admin" && password === "admin") {
+    //       return (
+    //       <Link to={"admin"}></Link>
+    //       )
+    //     } else {
+    //       // Show error message
+    //       setMessage("Incorrect email or password");
+    //     }
+    //   };
+      
+
     return(
         <div>
             <div className="Navbar">
-                <Link to="home">
+                <Link to="/">
                     <img src={logo} className="logo" alt="logo"/>
                 </Link>
                 <Link to={"home"}>
@@ -35,6 +47,7 @@ const LandingPage = () => {
             </div>
             <div className="formcontainer">
                 <div className="adminform">
+                    {/* <form onSubmit = {handleSubmit}> */}
                     <label>Admin Email:</label>
                     <input
                         type="text"
@@ -50,17 +63,23 @@ const LandingPage = () => {
                         onChange={handlePasswordChange}
                         value={password}
                     />
-
-                    <Link to={{ 
-                            pathname: "/admin",
-                            }}>
-                            <button className="dashbutton" disabled={disabled}>Admin Login</button>
+                    { email === "admin" && password === "admin" ? (
+                    <Link to="/admin">
+                        <button className="dashbutton" disabled={disabled}>
+                        Admin Login
+                        </button>
                     </Link>
+                    ) : (
+                    <button className="dashbutton" disabled={disabled} onClick={() => setMessage("incorrect email or password")}>
+                        Admin Login
+                    </button>
+                    )}
+                   
+                    {/* </form> */}
                     {message && <p> {message} </p>}
             </div>
         </div>
         <hr className="hr" />
-        {/* <Banner /> */}
         </div>
 
     )

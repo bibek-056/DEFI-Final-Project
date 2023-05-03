@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import logo from '../assets/logo.png'
 import { Link } from "react-router-dom";
-import { useContract, useContractWrite } from "@thirdweb-dev/react";
+import { useContract, useContractWrite, useContractRead } from "@thirdweb-dev/react";
 
 const Admin = () => {
+
+    const [stakerKey, setStakerKey] = useState("");
+    const [borrowerKey, setBorrowerKey] = useState("");
+    // const [stakerData, setStakerData] = useState("");
+    const [disabled1, setDisabled1] = useState(true);
+    const [disabled2, setDisabled2] = useState(true);
 
     const { contract } = useContract(process.env.REACT_APP_CONTRACT);
     const { mutateAsync: addInterestToBorrower, isLoading: isLoading1 } = useContractWrite(contract, "addInterestToBorrower");
@@ -48,6 +54,32 @@ const Admin = () => {
           }
     }
 
+    const handleLogOut = () => {
+        <Link to={'/'} />
+    }
+
+    const handleStakerKeyChange = (e) => {
+        setStakerKey(e.target.value)
+        setDisabled1(!e.target.value)
+        
+    }
+
+    const handleBorrowerKeyChange = (e) => {
+        setBorrowerKey(e.target.value)
+        setDisabled2(!e.target.value)
+    }
+
+    // const getStakerData = async (stakerKey) => {
+    //     const { data: stakerData } = await useContractRead(contract, "stakerData", stakerKey);
+    //     setStakerData(stakerData);
+    // }
+
+    // const handleGetStakerData = () => {
+    //     getStakerData(stakerKey);
+    // }
+
+
+
     return (
         <div>
             <div className="Navbar">
@@ -74,12 +106,40 @@ const Admin = () => {
                     <button className="adminbutton" onClick={handleLiquidate}>
                         Liquidate Unpaid Loans
                     </button>
+                    <Link to={'/'}>
+                        <button className="dashbutton">
+                            Log Out
+                        </button>   
+                    </Link>              
                     {message && <p>{message}</p>}
                 </div>
                 
                 <hr className="hr_verticle"/>
                 <div className="admindetails">
                     <h3>Admin Details dashboard</h3>
+                    <div className="adminform">
+                        <h5>Staker's data:</h5>
+                        <label>Staker Key</label>
+                        <input
+                        type="text"
+                        className="input_text"
+                        onChange={handleStakerKeyChange}
+                        value={stakerKey} 
+                        />
+                        <button className="dashbutton" disabled={disabled1} >Get Data</button>
+                    </div>
+                    <hr />
+                    <div className="adminform">
+                        <h5>Borrower's Data:</h5>
+                        <label>Borrower Key</label>
+                        <input
+                            type="text"
+                            className="input_text"
+                            onChange={handleBorrowerKeyChange}
+                            value={borrowerKey} 
+                        />
+                        <button className="dashbutton" disabled={disabled2}>Get Data</button>
+                    </div>
                 </div>
             </div>
         </div>
