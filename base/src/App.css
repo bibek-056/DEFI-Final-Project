@@ -269,6 +269,7 @@
 .dashbutton{
   width: 200px;
   height: 40px;
+  margin: 5px;
   color: #232323;
   border: #232323;
   font-family: "Poppins";

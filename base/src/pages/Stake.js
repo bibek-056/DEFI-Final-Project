@@ -1,19 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { EthContext } from "../context/Ethstate";
 import { useContext } from "react";
 import { useContract, useContractWrite } from "@thirdweb-dev/react";
 import Navbar from "../Components/Navbar";
+import usdcAbi from "../abis/usdc-abi.json";
+import defiAbi from "../abis/defi-abi.json";
+import { ethers } from "ethers";
 
 const Stake = () => {
-  const { metamaskConnect, account } = useContext(EthContext);
-  const { contract } = useContract(process.env.REACT_APP_CONTRACT);
-  const { usdcContract } = useContract(process.env.REACT_APP_USDCCONTRACT);
-  const { mutateAsync: depositUSDCEarnInterest, isLoading: contractLoading } = useContractWrite(contract, "depositUSDCEarnInterest");
-  const { mutateAsync: approve, isLoading: usdcContractLoading } = useContractWrite(usdcContract, "approve");
+  const { metamaskConnect, account, signer, provider } = useContext(EthContext);
+  const myContract = new ethers.Contract(process.env.REACT_APP_CONTRACT, defiAbi, signer);
+  const usdcContract = new ethers.Contract(process.env.REACT_APP_USDCCONTRACT, usdcAbi, signer);
+  // const { mutateAsync: depositUSDCEarnInterest, isLoading: contractLoading } = useContractWrite(myContract, "depositUSDCEarnInterest", defiAbi);
+  // const { mutateAsync: approve, isLoading: usdcContractLoading } = useContractWrite(usdcContract, "approve", usdcAbi);
   const [amount, setAmount] = useState("");
+  const [stakeAmount, setStakeAmonut] = useState("");
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [message, setMessage] = useState("");
+
+  useEffect (() => {
+    setStakeAmonut(amount * 10**6)
+  }, [amount]);
 
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
@@ -25,21 +33,24 @@ const Stake = () => {
     setDisabled(!e.target.checked || !amount);
   };
 
-  const callSenderApprove  = async (account, amount) => {
+  const callSenderApprove  = async (stakeAmount) => {
+    setMessage("Processing your Transaction. Approve the metamask tranasactions when prompted.")
     try {
-      const data = await approve({ args: [account, amount] });
+      const data = await usdcContract.approve(process.env.REACT_APP_CONTRACT, stakeAmount);
+      console.log("data:", data);
       console.info("contract call successs", data);
+      setMessage("Transaction Approved");
       //actual transfer function
-      await handleStakeNow( amount );
+      await handleStakeNow( stakeAmount );
     } catch (err) {
       console.error("contract call failure", err);
       setMessage("Couldnot approve your transaction");
     }
   }
 
-  const handleStakeNow = async ( amount ) => {
+  const handleStakeNow = async ( stakeAmount ) => {
     try {
-      const data = await depositUSDCEarnInterest({ args: [amount] });
+      const data = await myContract.depositUSDCEarnInterest(stakeAmount)
       console.info("contract call successs", data);
       setMessage("Transaction Successful");
     } catch (err) {
@@ -94,13 +105,14 @@ const Stake = () => {
                   onChange={handleAmountChange}
                 />
               </div>
+              { stakeAmount ? <p>{stakeAmount} USDC WEI</p> : <p> 0 USDC WEI</p>}
               <div className="form-check">
                 <input className="input_checkbox" type="checkbox" value="" id="flexCheckDefault" onChange={handleTermsAgreedChange}/>
                 <label>
                   <p className="concent">I agree to the terms and conditions.</p>
                 </label>
               </div>
-              <button className="dashbutton" onClick={() => callSenderApprove( account, amount ) } disabled={disabled}>
+              <button className="dashbutton" onClick={() => callSenderApprove( stakeAmount ) } disabled={disabled}>
                 Stake Now
               </button>
               {message && <p>{message}</p>}
