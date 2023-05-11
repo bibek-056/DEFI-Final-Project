@@ -1,7 +1,8 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { EthContext } from "../context/Ethstate";
 import { Link } from "react-router-dom";
 import Navbar from "../Components/Navbar";
+
 
 const Borrow = () => {
 
@@ -11,6 +12,11 @@ const Borrow = () => {
     const [time, setTime] = useState('');
     const [termsAgreed, setTermsAgreed] = useState(false)
     const [disabled, setDisabled] = useState(true);
+    const [ethBorrow, setEthBorrow] = useState("");
+
+    useEffect (() => {
+        setEthBorrow(amount * 10**18)
+    }, [amount]);
 
 
     const handleAmountChange = (e) => {
@@ -65,6 +71,7 @@ const Borrow = () => {
                             placeholder="Amount in ETH"
                             onChange={handleAmountChange} />
                     </div>
+                    { ethBorrow ? <p>{ethBorrow} ETH Wei</p> : <p>0 ETH Wei</p>}
                     <div>
                         <label>Time Period of the loan</label>
                         <input
@@ -86,7 +93,7 @@ const Borrow = () => {
                     </div>
                     <Link to={{ 
                         pathname: "/borrow/borrowconfirm",
-                        search: `?amount=${amount}&time=${time}`
+                        search: `?amount=${amount}&time=${time}&ethAmount=${ethBorrow}`
                         }}>
                         <button className="dashbutton" disabled={disabled}>Borrow Now</button>
                     </Link>

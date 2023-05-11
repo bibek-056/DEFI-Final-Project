@@ -302,7 +302,7 @@ button.dashbutton:disabled {
 }
 
 .functions {
-  width: 40%;
+  width: 30%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -310,7 +310,7 @@ button.dashbutton:disabled {
 }
 
 .admindetails {
-  width: 60%;
+  width: 70%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -340,4 +340,8 @@ button.adminbutton:disabled {
   background-color: gray;
   color: white;
   cursor: not-allowed;
+}
+
+.adminTable {
+  width: 90%;
 }

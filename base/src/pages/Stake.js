@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { EthContext } from "../context/Ethstate";
 import { useContext } from "react";
-import { useContract, useContractWrite } from "@thirdweb-dev/react";
 import Navbar from "../Components/Navbar";
 import usdcAbi from "../abis/usdc-abi.json";
 import defiAbi from "../abis/defi-abi.json";
@@ -11,13 +10,21 @@ const Stake = () => {
   const { metamaskConnect, account, signer, provider } = useContext(EthContext);
   const myContract = new ethers.Contract(process.env.REACT_APP_CONTRACT, defiAbi, signer);
   const usdcContract = new ethers.Contract(process.env.REACT_APP_USDCCONTRACT, usdcAbi, signer);
-  // const { mutateAsync: depositUSDCEarnInterest, isLoading: contractLoading } = useContractWrite(myContract, "depositUSDCEarnInterest", defiAbi);
-  // const { mutateAsync: approve, isLoading: usdcContractLoading } = useContractWrite(usdcContract, "approve", usdcAbi);
   const [amount, setAmount] = useState("");
   const [stakeAmount, setStakeAmonut] = useState("");
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [disabled, setDisabled] = useState(true);
+
   const [message, setMessage] = useState("");
+
+  useEffect (() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage("");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   useEffect (() => {
     setStakeAmonut(amount * 10**6)
@@ -36,7 +43,10 @@ const Stake = () => {
   const callSenderApprove  = async (stakeAmount) => {
     setMessage("Processing your Transaction. Approve the metamask tranasactions when prompted.")
     try {
-      const data = await usdcContract.approve(process.env.REACT_APP_CONTRACT, stakeAmount);
+      const overrides = {
+        gasLimit: 50000
+      };
+      const data = await usdcContract.approve(process.env.REACT_APP_CONTRACT, stakeAmount, overrides);
       console.log("data:", data);
       console.info("contract call successs", data);
       setMessage("Transaction Approved");
@@ -50,6 +60,9 @@ const Stake = () => {
 
   const handleStakeNow = async ( stakeAmount ) => {
     try {
+      const overrides = {
+        gasLimit: 50000
+      };
       const data = await myContract.depositUSDCEarnInterest(stakeAmount)
       console.info("contract call successs", data);
       setMessage("Transaction Successful");
