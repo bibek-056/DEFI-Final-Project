@@ -1,6 +1,5 @@
 import React from 'react'
 import { useContract, useContractRead } from "@thirdweb-dev/react";
-import { Link } from 'react-router-dom';
 
 const Banner = () => {
     // const checkBalance = process.env.REACT_APP_CONTRACT
@@ -22,9 +21,9 @@ const Banner = () => {
                 <p className='detail'>32,414 ETH</p>
                 <hr/>
                 <p className='topic'>Total Interest Accured</p>
-                <p className='detail'>{isLoadingtotalinterest ? <p>...</p> : <p>{ displayTotal }</p>}
+                <div className='detail'>{isLoadingtotalinterest ? <p>...</p> : <p>{ displayTotal }</p>}
                 {/* <p className='detail'>{isLoadingtotalinterest ? <p>...</p> : <p>{ displayTotal }</p>} */}
-                <hr/></p>
+                </div><hr/>
                 <p className='topic'>Total USDC Locked In Pool:</p>
                 <p className='detail'>1234</p>
             </div>

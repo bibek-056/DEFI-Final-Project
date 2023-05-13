@@ -1,35 +1,89 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { EthContext } from "../context/Ethstate";
-import { useContract, useContractWrite } from "@thirdweb-dev/react";
 import Navbar from "../Components/Navbar";
+import { ethers } from "ethers";
+import axios from "axios";
+import usdcAbi from "../abis/usdc-abi.json";
 
 const Transfer = () => {
 
-    const { metamaskConnect, account } = useContext(EthContext)
-    const { contract } = useContract(process.env.REACT_APP_CONTRACT);
-    const { usdcContract } = useContract(process.env.REACT_APP_USDCCONTRACT);
-    const { mutateAsync: approve, isLoading } = useContractWrite(usdcContract, "approve")
+    const { metamaskConnect, account, signer, provider } = useContext(EthContext)
+
+    const usdcContract = new ethers.Contract(process.env.REACT_APP_CONTRACT, usdcAbi, signer, provider )
+
     const [amount, setAmount] = useState("");
+    const [transferAmt, setTransferAmt] = useState("");
     const [recipient, setRecipient] = useState("");
     const [termsAgreed, setTermsAgreed] = useState(false);
     const [gas, setGas] = useState('Select Gas');
     const [disabled, setDisabled] = useState(true);
+    const [message, setMessage] = useState("");
 
-    const callTransferFunction = async (recipient, amount) => {
-
-    }
-
-    const callSenderApprove  = async (account, recipient, amount) => {
-        try {
-          const data = await approve({ args: [account, amount] });
-          console.info("contract call successs", data);
-          //actual transfer function
-          await callTransferFunction(recipient, amount);
-        } catch (err) {
-          console.error("contract call failure", err);
-          return "Couldnot approve your transaction" + err.message;
+    useEffect (() => {
+        if (message) {
+          const timer = setTimeout(() => {
+            setMessage("");
+          }, 2000);
+          return () => clearTimeout(timer);
         }
-      }
+      }, [message]);
+    
+      useEffect (() => {
+        setTransferAmt(amount * 10**6)
+      }, [amount]);
+
+    // const callTransferFunction = async (recipient, transferAmt) => {
+    //     setMessage("Approved. Tranferring Asset..")
+    //     try {
+    //         const overrides = {
+    //             gasLimit: 50000
+    //           };
+    //         const data = await usdcContract.transfer(recipient, transferAmt, overrides);
+    //         console.log("transaction hash", data.hash);
+    //         const response = await axios.get(`https://api.etherscan.io/api?module=transaction&action=gettxreceiptstatus&txhash=${data.hash}&api_key=K4UMDB695592ZHIKWIY1WQY1A21ERJWV4H`);
+    //         const { status } = response.data.result;
+    //         if (status === '1') {
+    //             setMessage("Transaction Successful");
+    //         } else {
+    //             setMessage("couldnot complete the tranasction.")
+    //         }
+            
+    //     } catch (err) {
+    //         console.log("transaction failed", err);
+    //         setMessage("Transaction Failed.")
+    //     }
+    // }
+
+    // const callSenderApprove  = async (recipient, transferAmt) => {
+    //     setMessage("Approving transaction. Verify the transaction when prompted.")
+    //     try {
+    //         const overrides = {
+    //             gasLimit: 50000
+    //         };
+    //       const data = await usdcContract.approve(recipient, transferAmt, overrides);
+    //       console.log("contract call successs", data);
+    //       //actual transfer function
+    //       await callTransferFunction(recipient, transferAmt);
+    //     } catch (err) {
+    //       console.error("contract call failure", err);
+    //       setMessage("Couldnot approve your transaction");
+    //     }
+    //   }
+
+    const transferEth = async(signer, recipient, amount) => {
+        const tx = {
+            to: recipient,
+            value: ethers.utils.parseEther(amount)
+        }
+        try {
+            const txReceipt = await signer.sendTransaction(tx);
+            console.log("Transaction Completed", txReceipt);
+            setMessage("Successfully Transferred.")
+        } catch(err) {
+            console.loh("Transaction Failed", err);
+            setMessage("Couldnot Transfer.")
+        }
+    }
 
     const handleRecipientChange = (e) => {
         setRecipient(e.target.value);
@@ -50,15 +104,6 @@ const Transfer = () => {
         setTermsAgreed(e.target.checked);
         setDisabled(!e.target.checked || !recipient || !amount || !gas);
     };
-
-    // const callTransferFunction = async (recipient, amount) => {
-    //     try {
-    //       const data = await transferUSDC( recipient, amount );
-    //       console.info("contract call successs", data);
-    //     } catch (err) {
-    //       console.error("contract call failure", err);
-    //     }
-    //   }
 
     return(
         <div>
@@ -108,21 +153,22 @@ const Transfer = () => {
                         />
                     </div>
                     <select className="input_text" aria-label="Default select example" onChange={handleGasChange}>
-                        <option selected>Select Gas</option>
+                        <option defaultValue>Select Gas</option>
                         <option value="1">High Gas</option>
                         <option value="2">Medium Gas</option>
                         <option value="3">Low Gas</option>
                     </select>
                     <p>If you donot select any gas, the most suitable gas will be automatically selected for you.</p>
-                    <div class="form-check">
+                    <div className="form-check">
                         <input className="input_checkbox" type="checkbox" value="" id="flexCheckDefault" onChange={handleTermsAgreedChange}/>
                         <label>
                             <p className="concent">I agree to the terms and conditions.</p>
                         </label>
                     </div>
-                    <button className="dashbutton" onClick={() => callSenderApprove(account, recipient, amount) } disabled={disabled}>Transfer Now</button>
+                    <button className="dashbutton" onClick={() => transferEth(signer, recipient, amount) } disabled={disabled}>Transfer Now</button>
                 </div>
                 }
+                {message && <p>{message}</p>}
             </div>
         </div>
     </div>

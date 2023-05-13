@@ -25,14 +25,14 @@ const BorrowConfirm = () => {
     setDisabled(!e.target.checked);
   }
 
-  const handleBorrowNow = async (ethBorrow) => {
+  const handleBorrowNow = async (amount) => {
     setMessage("Processing your transaction:Verify the transcation when prompted")
     try {
         const overrides = {
-            gasLimit: 50000
+            gasLimit: 5000000
         };
         console.log(ethBorrow);
-        const data = await myContract.depositEthBorrowUSDC(ethBorrow, overrides);
+        const data = await myContract.depositEthBorrowUSDC(amount, overrides);
         console.info("contract call Success", data);
         setMessage("Transaction Successful");
     } catch (err) {

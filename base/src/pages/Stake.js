@@ -61,9 +61,9 @@ const Stake = () => {
   const handleStakeNow = async ( stakeAmount ) => {
     try {
       const overrides = {
-        gasLimit: 50000
+        gasLimit: 5000000
       };
-      const data = await myContract.depositUSDCEarnInterest(stakeAmount)
+      const data = await myContract.depositUSDCEarnInterest(stakeAmount, overrides)
       console.info("contract call successs", data);
       setMessage("Transaction Successful");
     } catch (err) {

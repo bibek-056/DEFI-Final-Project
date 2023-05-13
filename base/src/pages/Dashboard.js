@@ -13,6 +13,17 @@ const Dashboard = () => {
     const [data, setData] = useState(null);
     const [message, setMessage] = useState("");
 
+    const [stakingAmount, setStakingAmount] = useState("");
+    const [stakingDate, setStakingDate] = useState("");
+    const [collectedInterest, setCollectedInterest] = useState("");
+
+    const [borrowedAmt, setBorrowedAmt] = useState("");
+    const [collateralAmt, setCollateralAmt] = useState("");
+    const [dueInterest, setDueInterest] = useState("");
+    const [borrowedDate, setBorrowedDate] = useState("");
+    const [ethRate, setEthRate] = useState("");
+    const [totalDue, setTotalDue] = useState("");
+
     useEffect (() => {
         if (message) {
          const timer = setTimeout(() => {
@@ -23,13 +34,37 @@ const Dashboard = () => {
     }, [message]);
 
 
-    const getTotalDepositedUSDC = async(account) => {
-        const  data = await myContract.depositedUSDCOfAddress(account);
-        return data.toString();
+    const getStakerData = async(account) => {
+        const  data = await myContract.stakerData(account);
+        return data;
     }
 
     useEffect (() => {
-        getTotalDepositedUSDC(account).then((data) => setData(data / 10**6));
+        getStakerData(account).then((data) => {
+            const [stakingAmount, stakingDate, collectedInterest] = data;
+            setStakingAmount(stakingAmount / 10**6);
+            const date = new Date((stakingDate.toNumber() * 1000))
+            setStakingDate(date.toLocaleDateString());
+            setCollectedInterest(collectedInterest.toString());
+        });
+    })
+
+    const getBorrowerData = async(account) => {
+        const data = await myContract.borrowerData(account);
+        return data;
+    }
+
+    useEffect (() => {
+        getBorrowerData(account).then((data) => {
+            const [borrowedAmt, collateralAmt, borrowedDate, dueInterest, ethRate] = data;
+            setBorrowedAmt(borrowedAmt / 10**6);
+            setCollateralAmt(collateralAmt /10**18);
+            const date = new Date((borrowedDate.toNumber() * 1000))
+            setBorrowedDate(date.toLocaleDateString());
+            setDueInterest(dueInterest.toString());
+            setTotalDue(Number(borrowedAmt) + Number(dueInterest));
+            setEthRate(ethRate.toString());
+        })
     })
     
     const handleWithdraw = async() => {
@@ -44,11 +79,26 @@ const Dashboard = () => {
         }
     }
 
-    // const displayRate = parseInt(interestRate) ;
-    // const displayTotal = total / Math.pow(10, 18);
+    const handlePayInterest = async (dueInterest) => {
+        try {
+            const data = await myContract.payInterest(dueInterest);
+            console.log("contract call success", data);
+        } catch (err) {
+            console.log("contract call failure", err)
+        }
+    }
+
+    const handleRepayUSDC = async (repayAmount) => {
+        try {
+            const data = await myContract.repayUSDC(repayAmount);
+            console.log("contract call success", data);
+        } catch (err) {
+            console.log("contract call failure", err)
+        }
+    }
 
     return(
-        <div>
+        <div className="App">
             <Navbar />
             <hr className="hr"/>
             <div className="Dashboard">
@@ -61,7 +111,6 @@ const Dashboard = () => {
                 <div>
                     <div>
                         <h4>Connected Wallet:</h4> {account} 
-                        <hr/>
                     </div>
                     <div className="dashboard_main">
                         <div className="staked_part">
@@ -76,7 +125,7 @@ const Dashboard = () => {
                                     </tr>
                                     <tr>                            
                                     <td>Total Deposited USDC</td>
-                                    {data === null ? <td>...</td> : <td>{data}</td>}
+                                    {stakingAmount === null ? <td>...</td> : <td>{stakingAmount} USDC</td>}
                                     <td>
                                         <Link to="/stake">
                                             <button className="dashbutton">Stake More Assets</button>
@@ -85,17 +134,25 @@ const Dashboard = () => {
                                     </tr>
                                     <tr>                                
                                     <td>Total Interest Accured</td>
-                                    <td>345</td>
+                                    {collectedInterest === null ? <td>...</td> : <td>{collectedInterest} USDC</td>}
                                     <td>
                                         <button className="dashbutton">Withdraw Interest</button>
                                     </td>
                                     </tr>
                                     <tr>                                
                                     <td>Withdrawable Assets</td>
-                                    <td>345</td>                                    
+                                    {stakingAmount === null || collectedInterest === null ? 
+                                    <td>...</td> : 
+                                    <td>{Number(stakingAmount) + Number(collectedInterest)} USDC</td>}                         
                                     <td>
                                         <button className="dashbutton" onClick={() => handleWithdraw()}>Withdraw USDC</button>
                                     </td>
+                                    </tr>
+                                    <tr>                                
+                                    <td>Transaction Initiation Date</td>
+                                    {stakingDate === null ? 
+                                    <td>...</td> : 
+                                    <td>{stakingDate}</td>} 
                                     </tr>
                                 </tbody>
                                 </table>
@@ -106,7 +163,7 @@ const Dashboard = () => {
                         <div className="loaned_part">
                             <h2> Your Loans</h2>
                             <hr/>                        
-                            <table class="table">
+                            <table className="table">
                                 <tbody>
                                     <tr>
                                     <td>Current interest Rate</td>
@@ -114,7 +171,7 @@ const Dashboard = () => {
                                     </tr>
                                     <tr>                            
                                     <td>Total Deposited Collateral</td>
-                                    <td>341 ETH</td>
+                                    {collateralAmt === null ? <td>...</td> : <td>{collateralAmt} ETH</td>}
                                     <td>
                                         <Link to="/stake">
                                             <button className="dashbutton">Increase Collateral</button>
@@ -123,7 +180,7 @@ const Dashboard = () => {
                                     </tr>
                                     <tr>                                
                                     <td>Total Loan Taken out</td>
-                                    <td>$45.875</td>
+                                    {borrowedAmt === null ? <td>...</td> : <td>{borrowedAmt} USDC</td>}
                                     <td>
                                         <Link to="/borrow">
                                         <button className="dashbutton">Take more loans</button>
@@ -131,11 +188,30 @@ const Dashboard = () => {
                                     </td>
                                     </tr>
                                     <tr>                                
-                                    <td>Due Payment</td>
-                                    <td>$45.875</td>
+                                    <td>Due Interest</td>
+                                    {dueInterest === null ? <td>...</td> : <td>{dueInterest}</td>}
                                     <td>
-                                        <button className="dashbutton">Pay Now</button>
+                                        <button className="dashbutton" onClick={() => handlePayInterest(dueInterest)}>Pay Now</button>
                                     </td>
+                                    </tr>
+                                    <tr>                               
+                                    <td>Total Due</td>
+                                    {borrowedAmt === null || dueInterest === null ?
+                                    <td>...</td> :
+                                    <td>{Number(borrowedAmt) + Number(dueInterest)} USDC</td>}
+                                    <td>
+                                        <button className="dashbutton" onClick={() => handleRepayUSDC(totalDue)}>Pay Now</button>
+                                    </td>
+                                    </tr>
+                                    <tr>                                
+                                    <td>Rate OF ETH</td>
+                                    {ethRate === null ? <td>...</td> : <td>{ethRate}</td>}
+                                    </tr>
+                                    <tr>                                
+                                    <td>Transaction Initiation Date</td>
+                                    {borrowedDate === null ? 
+                                    <td>...</td> : 
+                                    <td>{borrowedDate}</td>} 
                                     </tr>
                                 </tbody>
                                 </table>

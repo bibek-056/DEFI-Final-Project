@@ -64,7 +64,7 @@ const Borrow = () => {
                     <h4>Connected Wallet:</h4> {account} 
                     <hr/>
                     <div>
-                        <label>Amount to Stake</label>
+                        <label>Collateral Amount</label>
                         <input
                             className="input_text"
                             type="number"
@@ -80,7 +80,7 @@ const Borrow = () => {
                             placeholder="in year(s)"
                             onChange={handleTimeChange} />
                     </div>
-                    <div class="form-check">
+                    <div className="form-check">
                         <input
                             className="input_checkbox"
                             type="checkbox"

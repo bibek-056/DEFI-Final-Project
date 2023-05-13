@@ -1,12 +1,10 @@
-
-//  READ FUNCTIONS NOT WORKING; WRITE FUNCTIONS WORKING
-
 import React, { useState, useContext, useEffect } from "react";
 import { EthContext } from "../context/Ethstate";
 import logo from '../assets/logo.png'
 import { Link } from "react-router-dom";
 import { ethers } from "ethers";
 import defiAbi from "../abis/defi-abi.json";
+import { useTransferBatchToken } from "@thirdweb-dev/react";
 const { isAddress } = require('ethers/lib/utils');
 
 
@@ -17,8 +15,12 @@ const Admin = () => {
     const myContract = new ethers.Contract(process.env.REACT_APP_CONTRACT, defiAbi, signer, provider);
     console.log("contract:", myContract);
 
+    const [totalStakedAmt, setTotalStakedAmt] = useState("");
+
     const [stakerKey, setStakerKey] = useState("");
     const [borrowerKey, setBorrowerKey] = useState("");
+    const [stakerAcc, setStakerAcc] = useState("");
+    const [borrowerAcc, setBorrowerAcc] = useState("");
 
     const [stakerData, setStakerData] = useState("");
     const [stakingAmount, setStakingAmount] = useState("");
@@ -37,16 +39,18 @@ const Admin = () => {
 
     const [ message1, setMessage1 ] = useState("");
     const [ message2, setMessage2 ] = useState("");
+    const [ message3, setMessage3 ] = useState("");
 
     useEffect (() => {
-        if (message1 || message2) {
+        if (message1 || message2 || message3) {
             const timer = setTimeout(() => {
                 setMessage1("");
                 setMessage2("");
+                setMessage3("");
             }, 2000);
             return () => clearTimeout(timer);
         }
-    }, [message1, message2]);
+    }, [message1, message2, message3]);
 
     useEffect (() => {
         if (stakerData) {
@@ -69,6 +73,18 @@ const Admin = () => {
             setEthRate(ethRate.toString());
         }
     }, [borrowerData]);
+
+    const handleCalculateInterest = async () => {
+        setMessage1("Processing your transaction...");
+        try {
+            const data = await myContract.calculateInterestAmount();
+            console.info("contract call successs", data);
+            setMessage1("Calculated Interest Amount");
+          } catch (err) {
+            console.error("contract call failure", err);
+            setMessage1("Transaction failed");
+          }
+        }
 
     const handleDistributeInterest = async () => {
         setMessage1("Processing your transaction...");
@@ -110,16 +126,27 @@ const Admin = () => {
         setStakerKey(e.target.value)
         setDisabled1(!e.target.value)
         setStakerData("");
+        setStakerAcc("");
     }
 
     const handleBorrowerKeyChange = (e) => {
         setBorrowerKey(e.target.value)
         setDisabled2(!e.target.value)
         setBorrowerData("");
+        setBorrowerAcc("");
     }
 
+    const getTotalStakedAmount = async () => {
+        const total = await myContract.viewTotalStakedAmount();
+        console.log(total);
+        return total;
+    }
+
+    useEffect (( ) => {
+        getTotalStakedAmount().then((total) => { setTotalStakedAmt((total / 10**6).toString())});
+    })
     const getStakerData = async (stakerKey) => {
-        console.log(stakerKey);
+        setMessage2("Loading...");
         try {
             if (isAddress(stakerKey)) {
                 const  stakerData = await myContract.stakerData(stakerKey);
@@ -128,6 +155,7 @@ const Admin = () => {
             } else {
                 const stakerAcc = await myContract.stakerId(stakerKey);
                 console.log("staker Acc:", stakerAcc);
+                setStakerAcc(stakerAcc);
                 const stakerData = await myContract.stakerData(stakerAcc);
                 setStakerData(stakerData);
             }
@@ -137,8 +165,7 @@ const Admin = () => {
     }
 
     const getBorrowerData = async (borrowerKey) => {
-        console.log(borrowerKey);
-        console.log(isAddress(borrowerKey));
+        setMessage3("Loading...")
         try {
             if (isAddress(borrowerKey)) {
                 const borrowerData = await myContract.borrowerData(borrowerKey);
@@ -146,11 +173,12 @@ const Admin = () => {
             } else if (!Number.isInteger(borrowerKey)) {
                 const borrowerAcc = await myContract.borrowerIDArray(borrowerKey);
                 console.log(borrowerAcc);
+                setBorrowerAcc(borrowerAcc);
                 const borrowerData = await myContract.borrowerData(borrowerAcc);
                 setBorrowerData(borrowerData);
             }
         } catch (err) {
-            setMessage2("Invalid Key Or Address.")
+            setMessage3("Invalid Key Or Address.")
         }
     }
 
@@ -171,6 +199,9 @@ const Admin = () => {
             <div className="admindashboard">
                 <div className="functions">
                     <h3>Admin Function buttons</h3>
+                    <button className="adminbutton" onClick={handleCalculateInterest}>
+                        Calculate Interest Amount
+                    </button>
                     <button className="adminbutton" onClick={handleDistributeInterest}>
                         Distribute Interest to Stakers
                     </button>
@@ -200,6 +231,7 @@ const Admin = () => {
                 <hr className="hr_verticle"/>
                 <div className="admindetails">
                     <h3>Admin Details dashboard</h3>
+                    {totalStakedAmt && <p>Total Staked USDC : {totalStakedAmt}</p>}
                     <div className="adminform">
                         <h5>Staker's data:</h5>
                         <input
@@ -211,7 +243,8 @@ const Admin = () => {
                         />
                         <button className="dashbutton" disabled={disabled1} onClick={()=> getStakerData (stakerKey)} >Get Data</button>
                     </div>
-                    { stakerData &&
+                    {!isAddress(stakerKey) &&<p>{stakerAcc}</p>}
+                    { !stakerData ? <p>{message2}</p> :
                     <table className="adminTable">
                     <thead>
                       <tr>
@@ -241,7 +274,8 @@ const Admin = () => {
                         />
                         <button className="dashbutton" disabled={disabled2} onClick={() => getBorrowerData(borrowerKey)}>Get Data</button>
                     </div>
-                    {borrowerData &&
+                    {!isAddress(borrowerKey) && <p>{borrowerAcc}</p>}
+                    {!borrowerData ? <p>{message3}</p> :
                         <table className="adminTable">
                             <thead>
                             <tr>
@@ -263,7 +297,6 @@ const Admin = () => {
                             </tbody>
                         </table>
                     }
-                    {message2 && <p>{message2}</p>}
                 </div>
             </div>
         </div>

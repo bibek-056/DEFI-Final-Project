@@ -11,28 +11,6 @@ import Dashboard from './pages/Dashboard';
 import BorrowConfirm from './pages/BorrowConfirm';
 import { ThirdwebProvider, useContract } from "@thirdweb-dev/react";
 
-
-// function App() {
-//   return (
-//     <EthProvider>
-//       <BrowserRouter>
-//         <div className="App">
-//           <Navbar />
-//           <hr className='hr'/>
-//           <Routes>
-//             <Route path='/' element={<Home />} />
-//             <Route path='/stake' element={<Stake />} />
-//             <Route path='/borrow' element={<Borrow />} />
-//             <Route path='/transfer' element={<Transfer />} />
-//             <Route path='/dashboard' element={<Dashboard />} />
-//             <Route path='/borrow/borrowconfirm' element={ <BorrowConfirm/> }/>
-//           </Routes>
-//         </div>
-//       </BrowserRouter>
-//     </EthProvider>
-//   );
-// }
-
 function App() {
   return (
     <ThirdwebProvider activeChain="goerli">
