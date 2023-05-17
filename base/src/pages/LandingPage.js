@@ -1,14 +1,23 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import logo from "../../src/assets/logo.png";
 import { Link } from "react-router-dom";
 
 
 const LandingPage = () => {
 
+    // const { handleAdminLogin, valid } = useContext(EthContext);
+
     const[email, setEmail] = useState("");
     const[password,setPassword] = useState("");
     const[disabled, setDisabled] = useState(true);
     const[message, setMessage] = useState("");
+    const[admin, setAdmin] = useState(false);
+
+    // useEffect (() => {
+    //     if (valid) {
+    //         setAdmin(valid);
+    //     }
+    // }, [valid]);
 
     const handleEmailChange = (e) => {
         setEmail(e.target.value);
@@ -20,17 +29,11 @@ const LandingPage = () => {
         setDisabled(!e.target.value || !email);
     }
 
-    // const handleSubmit = (e) => {
-    //     e.preventDefault()
-    //     if (email === "admin" && password === "admin") {
-    //       return (
-    //       <Link to={"admin"}></Link>
-    //       )
-    //     } else {
-    //       // Show error message
-    //       setMessage("Incorrect email or password");
+    // const handleAdminLogin = (email, password) => {
+    //     if (email === "admin" && password === "password") {
+    //         setAdmin(true) } else {
+    //         setAdmin(false)}
     //     }
-    //   };
       
 
     return(
@@ -64,25 +67,24 @@ const LandingPage = () => {
                         value={password}
                     />
                     { email === "admin" && password === "admin" ? (
-                    <Link to="/admin">
-                        <button className="dashbutton" disabled={disabled}>
-                        Admin Login
-                        </button>
+                    <Link to={{ 
+                        pathname: "/admin",
+                        search: `?email=${email}&password=${password}`
+                        }}>
+                        <button className="dashbutton" disabled={disabled}>Admin Login</button>
                     </Link>
                     ) : (
                     <button className="dashbutton" disabled={disabled} onClick={() => setMessage("incorrect email or password")}>
                         Admin Login
                     </button>
                     )}
-                   
-                    {/* </form> */}
-                    {message && <p> {message} </p>}
+                    {message && <p>{message}</p>}
             </div>
         </div>
         <hr className="hr" />
         </div>
 
     )
-}
+}  
 
 export default LandingPage;

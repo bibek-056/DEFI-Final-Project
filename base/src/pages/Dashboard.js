@@ -61,11 +61,23 @@ const Dashboard = () => {
             setCollateralAmt(collateralAmt /10**18);
             const date = new Date((borrowedDate.toNumber() * 1000))
             setBorrowedDate(date.toLocaleDateString());
-            setDueInterest(dueInterest.toString());
+            setDueInterest(dueInterest / 10**6);
             setTotalDue(Number(borrowedAmt) + Number(dueInterest));
             setEthRate(ethRate.toString());
         })
     })
+
+    const claimInterest = async () => {
+        setMessage("Processing Transaction. Verify when prompted.")
+        try {
+            const data = await myContract.claimInterest();
+            console.log("Contract Call Success", data);
+            setMessage("Successfully calimed Interest")
+        } catch (err) {
+            console.log("Contract Call Failure", err);
+            setMessage("Transaction Failed");
+        }
+    }
     
     const handleWithdraw = async() => {
         setMessage("Processing your transaction. Verify the transcation when prompted.")
@@ -136,7 +148,7 @@ const Dashboard = () => {
                                     <td>Total Interest Accured</td>
                                     {collectedInterest === null ? <td>...</td> : <td>{collectedInterest} USDC</td>}
                                     <td>
-                                        <button className="dashbutton">Withdraw Interest</button>
+                                        <button className="dashbutton" onClick={() => claimInterest()}>Withdraw Interest</button>
                                     </td>
                                     </tr>
                                     <tr>                                

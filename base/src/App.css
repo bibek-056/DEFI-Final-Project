@@ -345,3 +345,9 @@ button.adminbutton:disabled {
 .adminTable {
   width: 90%;
 }
+
+.terms {
+  text-align: left;
+  margin: 20px;
+  
+}

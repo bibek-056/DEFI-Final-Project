@@ -4,7 +4,7 @@ import logo from '../assets/logo.png'
 import { Link } from "react-router-dom";
 import { ethers } from "ethers";
 import defiAbi from "../abis/defi-abi.json";
-import { useTransferBatchToken } from "@thirdweb-dev/react";
+import { useLocation } from 'react-router-dom';
 const { isAddress } = require('ethers/lib/utils');
 
 
@@ -12,10 +12,16 @@ const Admin = () => {
 
     const { metamaskConnect, account, signer, provider } = useContext(EthContext);
 
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+    const email = searchParams.get('email');
+    const password = searchParams.get('password');
+
     const myContract = new ethers.Contract(process.env.REACT_APP_CONTRACT, defiAbi, signer, provider);
     console.log("contract:", myContract);
 
     const [totalStakedAmt, setTotalStakedAmt] = useState("");
+    const [valid, setValid] = useState(false);
 
     const [stakerKey, setStakerKey] = useState("");
     const [borrowerKey, setBorrowerKey] = useState("");
@@ -42,6 +48,12 @@ const Admin = () => {
     const [ message3, setMessage3 ] = useState("");
 
     useEffect (() => {
+        if (email && password) {
+            setValid( true );
+        }
+    })
+
+    useEffect (() => {
         if (message1 || message2 || message3) {
             const timer = setTimeout(() => {
                 setMessage1("");
@@ -58,7 +70,7 @@ const Admin = () => {
             setStakingAmount(stakingAmount / 10**6);
             const date = new Date(((stakingDate.toNumber() * 1000)))
             setStakingDate(date.toLocaleString());
-            setCollectedInterest(collectedInterest.toString());
+            setCollectedInterest(collectedInterest / 10**6);
         }
     }, [stakerData]);
 
@@ -69,7 +81,7 @@ const Admin = () => {
             setCollateralAmt(collateralAmt / 10**18);
             const date = new Date(((borrowedDate.toNumber() * 1000)));
             setBorrowedDate(date.toLocaleString());
-            setDueInterest(dueInterest.toString());
+            setDueInterest(dueInterest / 10**6);
             setEthRate(ethRate.toString());
         }
     }, [borrowerData]);
@@ -97,18 +109,6 @@ const Admin = () => {
             setMessage1("Transaction failed");
           }
         }
-
-    const handleAddInterstToBorrower = async () => {
-        setMessage1("Processing your transaction...");
-        try {
-            const data = await myContract.addInterestToBorrower();
-            console.info("contract call successs", data);
-            setMessage1("Successfully added Interest to Borrower");
-          } catch (err) {
-            console.error("contract call failure", err);
-            setMessage1("Transaction failed" + err);
-          }
-    }
 
     const handleLiquidate = async () => {
         setMessage1("Processing your transaction...");
@@ -184,6 +184,8 @@ const Admin = () => {
 
     return (
         <div>
+        { valid ?
+        <div>
             <div className="Navbar">
                 <div>
                     <Link to="/admin">
@@ -205,9 +207,9 @@ const Admin = () => {
                     <button className="adminbutton" onClick={handleDistributeInterest}>
                         Distribute Interest to Stakers
                     </button>
-                    <button className="adminbutton" onClick={handleAddInterstToBorrower}>
+                    {/* <button className="adminbutton" onClick={handleAddInterstToBorrower}>
                         Add Interst to Borrower
-                    </button>
+                    </button> */}
                     <button className="adminbutton" onClick={handleLiquidate}>
                         Liquidate Unpaid Loans
                     </button>
@@ -227,7 +229,6 @@ const Admin = () => {
                                 
                     {message1 && <p>{message1}</p>}
                 </div>
-                
                 <hr className="hr_verticle"/>
                 <div className="admindetails">
                     <h3>Admin Details dashboard</h3>
@@ -299,6 +300,9 @@ const Admin = () => {
                     }
                 </div>
             </div>
+        </div>
+        : 
+        <div><h1>Login Credentials not found. Please login with proper email and password.</h1></div>}
         </div>
     )
 };

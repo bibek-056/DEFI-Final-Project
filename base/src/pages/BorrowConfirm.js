@@ -71,7 +71,7 @@ const BorrowConfirm = () => {
                     <p>You will be liable to pay the whole principle amount and interest at the end of the loan term. </p>
                     <p>Failure to pay the loan or drop in the market value of deposited collateral will result in liqudation of your deposited assets.</p>
                     <p>Proceed only if you have read and understood the whole terms and conditions. </p>
-                    <div class="form-check">
+                    <div className="form-check">
                         <input
                             className="input_checkbox"
                             type="checkbox"
@@ -82,7 +82,7 @@ const BorrowConfirm = () => {
                             <p className="concent">I understand and wish to proceed.</p>
                         </label>
                     </div>
-                    <button className="dashbutton" onClick={() => handleBorrowNow(ethBorrow)}disabled={disabled}>Proceed</button>
+                    <button className="dashbutton" onClick={() => handleBorrowNow(amount)}disabled={disabled}>Proceed</button>
                     {message && <p>{message}</p>}
                   </div>
               </div>

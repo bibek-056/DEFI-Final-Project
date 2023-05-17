@@ -1,13 +1,32 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import { useContract, useContractRead } from "@thirdweb-dev/react";
+import { ethers } from 'ethers';
+import { useState } from 'react';
+import defiAbi from "../abis/defi-abi.json"
+import { EthContext } from '../context/Ethstate';
 
 const Banner = () => {
     // const checkBalance = process.env.REACT_APP_CONTRACT
-    const { contract } = useContract(process.env.REACT_APP_CONTRACT);
-    const { data: totalinterest, isLoading: isLoadingtotalinterest } = useContractRead(contract, "viewTotalCollectedInterest");
+    const { metamaskConnect,account, signer, provider} = useContext(EthContext)
+    const myContract = new ethers.Contract(process.env.REACT_APP_CONTRACT, defiAbi, signer, provider);
+    const [totalInterest, setTotalInterest] = useState("");
+    const [totalStakedAmount, setTotalStakedAmount] = useState("");
 
-    const displayTotal = parseInt(totalinterest);
+    useEffect (() => {
+        getDetails();
+    })
     
+    const getDetails = async() => {
+        try {
+            const totalInterest = await myContract.viewTotalCollectedInterest();
+            setTotalInterest(totalInterest / 10**6);
+            const totalStakedAmount = await myContract.viewTotalStakedAmount();
+            setTotalStakedAmount(totalStakedAmount / 10**6);
+         } catch (err) {
+            setTotalInterest("");
+            setTotalStakedAmount("");
+         }
+    }
     return (
     <div>
         {/* <Navbar /> */}
@@ -21,11 +40,11 @@ const Banner = () => {
                 <p className='detail'>32,414 ETH</p>
                 <hr/>
                 <p className='topic'>Total Interest Accured</p>
-                <div className='detail'>{isLoadingtotalinterest ? <p>...</p> : <p>{ displayTotal }</p>}
-                {/* <p className='detail'>{isLoadingtotalinterest ? <p>...</p> : <p>{ displayTotal }</p>} */}
-                </div><hr/>
+                <div className='detail'>{!totalInterest ? <p>...</p> : <p>{ totalInterest }</p>}
+                </div>
+                <hr/>
                 <p className='topic'>Total USDC Locked In Pool:</p>
-                <p className='detail'>1234</p>
+                <div className='detail'>{!totalStakedAmount ? <p>...</p> : <p>{totalStakedAmount}</p>}</div>
             </div>
         </div>
     </div>

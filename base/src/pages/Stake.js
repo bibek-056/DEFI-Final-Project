@@ -122,7 +122,7 @@ const Stake = () => {
               <div className="form-check">
                 <input className="input_checkbox" type="checkbox" value="" id="flexCheckDefault" onChange={handleTermsAgreedChange}/>
                 <label>
-                  <p className="concent">I agree to the terms and conditions.</p>
+                  <p className="concent">I agree to the <a href="/terms">terms and conditions</a>.</p>
                 </label>
               </div>
               <button className="dashbutton" onClick={() => callSenderApprove( stakeAmount ) } disabled={disabled}>

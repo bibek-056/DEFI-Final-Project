@@ -7,6 +7,7 @@ export const EthProvider = ( props ) => {
     const [ provider, setProvider] = useState(null);
     const [ signer, setSigner] = useState(null);
     const [ account, setAccount] = useState(null);
+    // const [valid, setValid ] = useState(false);
 
     useEffect(() => {
         console.log("Provider:", provider);
@@ -33,6 +34,13 @@ export const EthProvider = ( props ) => {
             console.log("Metamask not installed");
         }
     }
+
+//    const handleAdminLogin = (email, password) => {
+//         { email === "admin" && password === "password" ?
+//             setValid(true) :
+//             setValid(false)
+//         }
+//     } 
 
     return (
         <EthContext.Provider value={{provider, signer, account, metamaskConnect}}>

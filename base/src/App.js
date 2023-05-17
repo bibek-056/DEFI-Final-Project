@@ -6,6 +6,7 @@ import Borrow from './pages/Borrow';
 import Stake from './pages/Stake';
 import Transfer from './pages/Transfer';
 import Admin from './pages/Admin';
+import Terms from './pages/Terms';
 import { EthProvider } from './context/Ethstate';
 import Dashboard from './pages/Dashboard';
 import BorrowConfirm from './pages/BorrowConfirm';
@@ -27,6 +28,7 @@ function App() {
               <Route path='/dashboard' element={<Dashboard />} />
               <Route path='/admin' element={ <Admin/>}/>
               <Route path='/borrow/borrowconfirm' element={ <BorrowConfirm/> }/>
+              <Route path='/terms' element={<Terms/>}/>
             </Routes>
           </div>
         </BrowserRouter>

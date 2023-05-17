@@ -4,6 +4,7 @@ import Navbar from "../Components/Navbar";
 import { ethers } from "ethers";
 import axios from "axios";
 import usdcAbi from "../abis/usdc-abi.json";
+const { isAddress } = require('ethers/lib/utils');
 
 const Transfer = () => {
 
@@ -71,17 +72,22 @@ const Transfer = () => {
     //   }
 
     const transferEth = async(signer, recipient, amount) => {
-        const tx = {
-            to: recipient,
-            value: ethers.utils.parseEther(amount)
-        }
-        try {
-            const txReceipt = await signer.sendTransaction(tx);
-            console.log("Transaction Completed", txReceipt);
-            setMessage("Successfully Transferred.")
-        } catch(err) {
-            console.loh("Transaction Failed", err);
-            setMessage("Couldnot Transfer.")
+        setMessage("Processing...")
+        if (!isAddress(recipient)) {
+            setMessage("Invalid Address")
+        } else {
+            const tx = {
+                to: recipient,
+                value: ethers.utils.parseEther(amount)
+            }
+            try {
+                const txReceipt = await signer.sendTransaction(tx);
+                console.log("Transaction Completed", txReceipt);
+                setMessage("Successfully Transferred.")
+            } catch(err) {
+                console.loh("Transaction Failed", err);
+                setMessage("Couldnot Transfer.")
+            }
         }
     }
 
@@ -140,6 +146,7 @@ const Transfer = () => {
                             className="input_text" 
                             type="string"
                             value={recipient}
+                            placeholder="Vaild wallet Address"
                             onChange={handleRecipientChange}
                         />
                     </div>
@@ -149,6 +156,7 @@ const Transfer = () => {
                             className="input_text" 
                             type="number"
                             value={amount}
+                            placeholder="Amount in ETH"
                             onChange={handleAmountChange}
                         />
                     </div>
@@ -162,7 +170,7 @@ const Transfer = () => {
                     <div className="form-check">
                         <input className="input_checkbox" type="checkbox" value="" id="flexCheckDefault" onChange={handleTermsAgreedChange}/>
                         <label>
-                            <p className="concent">I agree to the terms and conditions.</p>
+                            <p className="concent">I agree to the <a href="/terms">terms and conditions</a>.</p>
                         </label>
                     </div>
                     <button className="dashbutton" onClick={() => transferEth(signer, recipient, amount) } disabled={disabled}>Transfer Now</button>

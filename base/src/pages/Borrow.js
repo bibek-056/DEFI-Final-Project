@@ -88,7 +88,7 @@ const Borrow = () => {
                             id="flexCheckDefault"
                             onChange={handleTermsAgreedChange}/>
                         <label>
-                            <p className="concent">I agree to the terms and conditions.</p>
+                            <p className="concent">I agree to the <a href="/terms">terms and conditions</a>.</p>
                         </label>
                     </div>
                     <Link to={{ 
