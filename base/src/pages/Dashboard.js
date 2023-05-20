@@ -132,7 +132,7 @@ const Dashboard = () => {
                                 <tbody>
                                     <tr>
                                     <td>Current interest Rate</td>
-                                    <td>2%</td>
+                                    <td>8.2%</td>
                                     {/* {isLoadingInterestRate ? <td>...</td> : <td>{`${displayRate}%`|| "x"}</td>} */}
                                     </tr>
                                     <tr>                            

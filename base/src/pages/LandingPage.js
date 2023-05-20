@@ -13,6 +13,15 @@ const LandingPage = () => {
     const[message, setMessage] = useState("");
     const[admin, setAdmin] = useState(false);
 
+    useEffect (() => {
+        if (message) {
+            const timer = setTimeout(() => {
+                setMessage("");
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [message])
+
     // useEffect (() => {
     //     if (valid) {
     //         setAdmin(valid);
@@ -27,14 +36,7 @@ const LandingPage = () => {
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);
         setDisabled(!e.target.value || !email);
-    }
-
-    // const handleAdminLogin = (email, password) => {
-    //     if (email === "admin" && password === "password") {
-    //         setAdmin(true) } else {
-    //         setAdmin(false)}
-    //     }
-      
+    } 
 
     return(
         <div>

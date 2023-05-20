@@ -114,13 +114,7 @@
   {
     "type": "function",
     "name": "depositEthBorrowUSDC",
-    "inputs": [
-      {
-        "type": "uint256",
-        "name": "amount",
-        "internalType": "uint256"
-      }
-    ],
+    "inputs": [],
     "outputs": [],
     "stateMutability": "payable"
   },

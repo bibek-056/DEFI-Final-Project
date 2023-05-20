@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { EthContext } from "../context/Ethstate";
 import { useLocation } from 'react-router-dom';
 import Navbar from "../Components/Navbar";
@@ -15,10 +15,19 @@ const BorrowConfirm = () => {
   const amount = searchParams.get('amount');
   const time = searchParams.get('time');
   const ethBorrow = searchParams.get('ethAmount');
-  const borrowableAmount = amount * 10;
+  const borrowableAmount = amount * 1000;
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [message, setMessage] = useState("");
+
+  useEffect (() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage("");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const handleTermsAgreedChange = (e) => {
     setTermsAgreed(e.target.checked);
@@ -28,11 +37,12 @@ const BorrowConfirm = () => {
   const handleBorrowNow = async (amount) => {
     setMessage("Processing your transaction:Verify the transcation when prompted")
     try {
+      const passAmount = ethers.utils.parseEther(amount)
         const overrides = {
-            gasLimit: 5000000
+            gasLimit: 5000000,
+            value: passAmount
         };
-        console.log(ethBorrow);
-        const data = await myContract.depositEthBorrowUSDC(amount, overrides);
+        const data = await myContract.depositEthBorrowUSDC(overrides)
         console.info("contract call Success", data);
         setMessage("Transaction Successful");
     } catch (err) {
